@@ -1,0 +1,163 @@
+# AlgoVerse
+
+**Build your intuition, one algorithm at a time.**
+
+AlgoVerse is a browser-only algorithm learning workspace built with React and TypeScript. It combines animated sorting, reversible playback, real operation counts, and explanations tied to the exact algorithm state.
+
+**Status: Phase 1 — Foundation.** Bubble Sort, Selection Sort, and Insertion Sort are implemented. The later-phase navigation opens honest roadmap pages; it does not simulate unfinished features. There is no backend, account system, or deployed URL.
+
+## Screenshots
+
+These are actual screenshots from the running application, captured by the browser tests.
+
+![AlgoVerse dashboard](docs/screenshots/dashboard-desktop.png)
+
+![Sorting lab with a custom array, negative values, and highlighted pseudocode](docs/screenshots/lab-desktop.png)
+
+[Mobile dashboard](docs/screenshots/dashboard-mobile.png) · [Mobile sorting lab](docs/screenshots/lab-mobile.png)
+
+## What works in Phase 1
+
+- Responsive dark workspace, dashboard, algorithm search (`Ctrl/Cmd + K`), and working routes.
+- Three sorting labs: optimized Bubble Sort, Selection Sort, and adjacent-swap Insertion Sort.
+- Play, pause, resume, replay, single-step forward/backward, reset, and timeline seeking.
+- Speed control from 0.5× to 4×; generated arrays from 1–40 elements.
+- Random, reversed, nearly sorted, and duplicate-heavy inputs.
+- Custom arrays, including negative values, duplicates, zero, and decimals, with validation.
+- Animated SVG bars with stable item identities, a zero baseline, state colors, and a text readout.
+- Exact comparison/swap counts, highlighted pseudocode, and current pointer indices.
+- Beginner/advanced operation explanations, algorithm intuition, applications, and complexity notes.
+- Persisted playback preferences and recently opened labs. No fabricated learning statistics.
+- Reduced-motion support, keyboard-accessible controls, labeled inputs, visible focus, and recoverable invalid routes.
+- Automated algorithm, playback, input, persistence, and desktop/mobile browser tests.
+
+## Stack
+
+React · TypeScript · Vite · Tailwind CSS · Motion for React · Lucide React · React Router · Vitest · Testing Library · Playwright
+
+Tailwind's Vite plugin supplies utilities, while `src/styles.css` defines the product's visual system. Motion animates SVG positions; no canvas is needed for the Phase 1 bar chart. The dependency lockfile is included.
+
+## Run locally
+
+Use **Node.js 22.12+** (an LTS release is recommended) and npm. Open a terminal in this project directory:
+
+```sh
+npm ci
+npm run dev
+```
+
+Open the Local URL Vite prints, normally **http://127.0.0.1:5173**. `npm ci` is only needed for a fresh checkout or a changed lockfile. Do not open `index.html` directly from the filesystem.
+
+### Commands
+
+| Command                | Purpose                                                     |
+| ---------------------- | ----------------------------------------------------------- |
+| `npm run dev`          | Start the local Vite development server                     |
+| `npm run typecheck`    | Check strict TypeScript types                               |
+| `npm run lint`         | Run ESLint with zero warnings allowed                       |
+| `npm run format`       | Format source and documentation with Prettier               |
+| `npm run format:check` | Verify consistent formatting without changing files         |
+| `npm test`             | Run the 69 unit/integration tests once                      |
+| `npm run test:watch`   | Watch unit/integration tests during development             |
+| `npm run build`        | Type-check and generate the production `dist/` directory    |
+| `npm run preview`      | Serve the production build locally                          |
+| `npm run check`        | Run type-check, lint, unit tests, and production build      |
+| `npm run test:e2e`     | Run 8 browser scenarios across desktop and mobile viewports |
+
+### Browser tests
+
+For a fresh environment, install the Playwright browser once:
+
+```sh
+npx playwright install chromium
+npm run test:e2e
+```
+
+You can use an existing Chrome installation instead. In PowerShell:
+
+```powershell
+$env:PLAYWRIGHT_CHANNEL = 'chrome'
+npm run test:e2e
+```
+
+On macOS/Linux:
+
+```sh
+PLAYWRIGHT_CHANNEL=chrome npm run test:e2e
+```
+
+The browser suite starts and closes its own Vite server on **5174**, independently of your development server. It captures real screenshots in `docs/screenshots/`. Mobile tests emulate a 390px iPhone viewport in Chromium; they are not a claim of testing a physical iPhone or Safari.
+
+## Architecture
+
+```text
+src/
+  algorithms/sorting/   Pure sorting functions and immutable trace builder
+  components/          Playback controls, educational panels, search, error boundary
+  data/                Typed educational content and pseudocode
+  hooks/               Playback state machine, scheduler, local preferences
+  layouts/             Sidebar, header, footer, and route outlet
+  pages/               Dashboard, sorting workspace, roadmap, not-found page
+  tests/               Algorithm, playback, input, and storage tests
+  types/               Shared algorithm and snapshot contracts
+  utils/               Input parsing, array generation, resilient storage
+  visualizers/         SVG rendering of a single snapshot
+e2e/                   Desktop/mobile interaction tests and owned preview server
+docs/                  Learning walkthrough and actual screenshots
+```
+
+```mermaid
+flowchart LR
+    A[Input array] --> B[Pure algorithm]
+    B --> C[Immutable snapshots]
+    D[Playback controls] --> E[Current snapshot index]
+    F[One cancellable timer] --> E
+    C --> G[Selected snapshot]
+    E --> G
+    G --> H[SVG bars]
+    G --> I[Counters and explanations]
+    G --> J[Pseudocode and pointers]
+```
+
+Every snapshot stores array items, operation type, active/sorted indices, pointer positions, cumulative counts, explanation text, and a pseudocode line. A bar keeps its original ID even when another bar has the same value.
+
+Stepping backward changes the current index. It does not reverse a swap or rerun the algorithm, so all visible state is restored together. Seeking, manual stepping, resetting, changing the input, or switching algorithms pauses playback. Switching algorithms starts a fresh lab; identical-input comparisons belong to Phase 2.
+
+The algorithms contain **no timers, random generation, React imports, or DOM access**. `usePlayback` owns one cancellable timer. SVG animation only interpolates between snapshots and cannot change algorithm correctness.
+
+## Understanding the three algorithms
+
+| Algorithm      | Core idea                                                                | Best  | Average / worst | Auxiliary space | Stable? |
+| -------------- | ------------------------------------------------------------------------ | ----- | --------------- | --------------- | ------- |
+| Bubble Sort    | Swap adjacent inversions; finalize the largest remaining value each pass | O(n)  | O(n²)           | O(1)            | Yes     |
+| Selection Sort | Find the minimum of the unsorted region; swap it into position           | O(n²) | O(n²)           | O(1)            | No      |
+| Insertion Sort | Move each new value left into the sorted prefix using adjacent swaps     | O(n)  | O(n²)           | O(1)            | Yes     |
+
+“Comparisons” counts value comparisons, not loop-bound checks. “Swaps” counts pairwise exchanges; even adjacent-swap Insertion Sort uses this definition. No wall-clock benchmark is presented. Increasing playback speed changes the learning experience, not algorithm performance.
+
+Insertion Sort's green prefix is **sorted relative to itself**, not finalized: later insertions can shift it. The explanation states this explicitly. Bubble Sort's sorted suffix and Selection Sort's sorted prefix are finalized.
+
+The O(1) space figures describe the underlying algorithms. Recording full immutable snapshots costs **O(n × number of steps)** additional memory, or O(n³) in the worst case for these quadratic algorithms. Inputs are capped at 40 values to keep this educational design responsive. A compact operation log with periodic checkpoints is a potential future optimization, not an implemented feature.
+
+See [the Phase 1 walkthrough](docs/PHASE-1-WALKTHROUGH.md) for a guided reading order and a concrete example.
+
+## Validation
+
+The unit suite covers empty/singleton arrays, sorted/reversed input, duplicates, negative values, decimals, invalid numbers, immutable snapshots, exact operation transitions, stability, and algorithm-specific counts. It also checks 480 seeded generated inputs across the three algorithms.
+
+Playback tests verify exact backward restoration, clamped seeking, pause/resume, replay, timer cancellation, speed changes, reset, and unmount cleanup. Browser scenarios exercise actual controls, custom inputs, navigation, persisted preferences, corrupt storage recovery, responsive width, and all three sorting labs.
+
+The configuration preserves paths in sandboxed Windows checkouts to avoid native `realpath` restrictions. Vitest workers disable Node's experimental Web Storage so jsdom owns browser storage consistently on Node 25. Neither setting changes application behavior in a browser.
+
+## Local data
+
+Only `algoverse:preferences` and `algoverse:recent` are written to localStorage. Preferences hold array size, speed, and explanation level. Recent entries are actual lab routes opened by the user; they do not claim lesson completion or mastery. Invalid or inaccessible storage falls back safely. You can clear these keys using your browser's developer tools.
+
+## Later phases — not implemented
+
+1. **Phase 2:** Merge, Quick, and Heap Sort; sorting battle mode.
+2. **Phase 3:** Pathfinding grids; Dijkstra, A\*, BFS, and DFS; terrain and mazes.
+3. **Phase 4:** Practice challenges, TypeScript/Python code mode, lesson completion and accuracy tracking.
+4. **Phase 5:** Data structure labs, further accessibility/performance refinement, and deployment preparation.
+
+The source includes a Vercel SPA fallback configuration for a future deployment. Use the Vite preset, `npm run build`, and `dist` as the output directory when that phase is authorized. No hosting has been created or published in Phase 1.
