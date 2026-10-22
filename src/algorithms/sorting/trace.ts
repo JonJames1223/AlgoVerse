@@ -1,7 +1,7 @@
 import type { ArrayItem, SortSnapshot } from '../../types/algorithm';
 
 type Frame = Pick<SortSnapshot, 'operation' | 'line' | 'explanation'> &
-  Partial<Pick<SortSnapshot, 'active' | 'sorted' | 'pointers' | 'advanced'>>;
+  Partial<Pick<SortSnapshot, 'active' | 'sorted' | 'pointers' | 'advanced' | 'buffer'>>;
 
 /** Shared bookkeeping only: no UI, clocks, random numbers, or input mutations. */
 export function createTrace(input: readonly number[]) {
@@ -12,6 +12,7 @@ export function createTrace(input: readonly number[]) {
   const frames: SortSnapshot[] = [];
   let comparisons = 0;
   let swaps = 0;
+  let writes = 0;
   let sorted: readonly number[] = [];
   const emit = (frame: Frame) => {
     if (frame.operation === 'compare') comparisons++;
@@ -26,12 +27,21 @@ export function createTrace(input: readonly number[]) {
         pointers: Object.freeze({ ...frame.pointers }),
         comparisons,
         swaps,
+        writes,
+        buffer: Object.freeze([...(frame.buffer ?? [])]),
         advanced: frame.advanced ?? frame.explanation,
       }),
     );
   };
   const swap = (a: number, b: number) => {
     [items[a], items[b]] = [items[b], items[a]];
+  };
+  // Commit a complete merged run together, preserving unique item identities in every frame.
+  const writeRange = (start: number, buffer: readonly ArrayItem[]) => {
+    buffer.forEach((item, offset) => {
+      items[start + offset] = item;
+    });
+    writes += buffer.length;
   };
   emit({
     operation: 'ready',
@@ -45,10 +55,10 @@ export function createTrace(input: readonly number[]) {
       operation: 'complete',
       line: -1,
       sorted: items.map((_, i) => i),
-      explanation: `All done. ${items.length} values in ascending order, with ${comparisons} comparisons and ${swaps} swaps.`,
-      advanced: `The array is sorted in nondecreasing order. This trace performed ${comparisons} value comparisons and ${swaps} pairwise swaps. Playback duration is not computation time.`,
+      explanation: `All done. ${items.length} values in ascending order, with ${comparisons} comparisons and ${writes ? `${writes} main-array writes` : `${swaps} swaps`}.`,
+      advanced: `The array is sorted in nondecreasing order. This trace performed ${comparisons} value comparisons, ${swaps} pairwise swaps, and ${writes} buffered writes to the main array. Playback duration is not computation time.`,
     });
     return Object.freeze(frames);
   };
-  return { items, emit, swap, finish };
+  return { items, emit, swap, writeRange, finish };
 }

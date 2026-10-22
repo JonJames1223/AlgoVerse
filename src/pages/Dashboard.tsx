@@ -41,7 +41,7 @@ export function Dashboard() {
           </p>
         </div>
         <span className="release-badge">
-          <span className="online-dot" /> Phase 01 <span>/</span> Foundations
+          <span className="online-dot" /> Phase 02 <span>/</span> Sorting algorithms
         </span>
       </div>
       <section className="dashboard-hero" aria-labelledby="hero-title">
@@ -114,7 +114,7 @@ export function Dashboard() {
             <BarChart3 size={19} />
           </span>
           <span>
-            <strong>3 ways to find order</strong>
+            <strong>{algorithmIds.length} ways to find order</strong>
             <small>Working, interactive sorting labs</small>
           </span>
         </div>
@@ -143,7 +143,7 @@ export function Dashboard() {
             <p className="eyebrow">LEARN BY DOING</p>
             <h2>Your sorting toolkit</h2>
           </div>
-          <span className="muted text-xs">Three different approaches. One sorted array.</span>
+          <span className="muted text-xs">Six different approaches. One sorted array.</span>
         </div>
         <div className="algorithm-grid">
           {algorithmIds.map((id, index) => {
@@ -156,7 +156,7 @@ export function Dashboard() {
               >
                 <div className="card-top">
                   <span className="algorithm-number">0{index + 1} / SORTING</span>
-                  <span className="level-tag">Beginner</span>
+                  <span className="level-tag">{info.level}</span>
                 </div>
                 <AlgorithmArt algorithm={id} />
                 <div className="algorithm-card-copy">
@@ -190,7 +190,7 @@ export function Dashboard() {
           </div>
           {recent.length ? (
             <div className="recent-list">
-              {recent.map((id) => (
+              {recent.slice(0, 3).map((id) => (
                 <Link to={`/sorting/${id}`} key={id}>
                   <span className={`recent-icon accent-${algorithms[id].accent}`}>
                     <BarChart3 size={19} />

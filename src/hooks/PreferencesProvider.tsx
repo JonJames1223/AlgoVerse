@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import { isAlgorithmId } from '../data/algorithms';
+import { algorithmIds, isAlgorithmId } from '../data/algorithms';
 import type { AlgorithmId } from '../types/algorithm';
 import { readStored, writeStored } from '../utils/storage';
 
@@ -40,7 +40,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       [],
       (value): value is AlgorithmId[] =>
         Array.isArray(value) &&
-        value.length <= 3 &&
+        value.length <= algorithmIds.length &&
         value.every(isAlgorithmId) &&
         new Set(value).size === value.length,
     ),
@@ -54,7 +54,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   }, []);
   const visit = useCallback((id: AlgorithmId) => {
     setRecent((current) => {
-      const next = [id, ...current.filter((item) => item !== id)].slice(0, 3);
+      const next = [id, ...current.filter((item) => item !== id)].slice(0, algorithmIds.length);
       writeStored('recent', next);
       return next;
     });

@@ -6,7 +6,7 @@ test('dashboard, search, honest roadmap, and responsive layouts', async ({ page 
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Build your intuition.' })).toBeVisible();
   await expect(page.getByText('Your next discovery starts here.')).toBeVisible();
-  await expect(page.locator('.algorithm-card')).toHaveCount(3);
+  await expect(page.locator('.algorithm-card')).toHaveCount(6);
   await page.screenshot({
     path: `docs/screenshots/dashboard-${testInfo.project.name}.png`,
     fullPage: true,
@@ -18,9 +18,9 @@ test('dashboard, search, honest roadmap, and responsive layouts', async ({ page 
   }));
   expect(width.scroll).toBeLessThanOrEqual(width.viewport);
   await page.locator('.search-trigger').click();
-  await page.getByRole('searchbox', { name: 'Search algorithms' }).fill('selection');
+  await page.getByRole('searchbox', { name: 'Search algorithms' }).fill('merge');
   await page.locator('.search-result').click();
-  await expect(page.getByRole('heading', { name: 'Selection Sort', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Merge Sort', exact: true })).toBeVisible();
   await page.goto('/roadmap/pathfinding');
   await expect(page.getByText('Planned for Phase 03')).toBeVisible();
   await page.getByRole('link', { name: 'Explore the sorting lab' }).click();
@@ -36,6 +36,7 @@ test('dashboard, search, honest roadmap, and responsive layouts', async ({ page 
 test('exact stepping, backward restoration, scrubbing, and input validation', async ({
   page,
 }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/sorting/bubble');
   await page.getByRole('button', { name: 'Custom input' }).click();
   await page.getByLabel('Your values').fill('3, -1, 2, 2');
@@ -49,6 +50,7 @@ test('exact stepping, backward restoration, scrubbing, and input validation', as
   await page.getByRole('button', { name: 'Step backward' }).click();
   await expect(page.getByTestId('swaps')).toHaveText('00');
   await expect(page.getByTestId('step-explanation')).toHaveText(explanation);
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: `docs/screenshots/lab-${testInfo.project.name}.png`,
     fullPage: true,

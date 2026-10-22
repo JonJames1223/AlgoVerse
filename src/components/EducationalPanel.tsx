@@ -55,13 +55,18 @@ export function PseudocodePanel({
               : 'Pointers appear as the algorithm advances.'}
           </p>
         )}
-        <p className="pointer-help">
-          {algorithm.id === 'bubble'
-            ? 'j scans neighbors · end bounds the unsorted region'
-            : algorithm.id === 'selection'
-              ? 'i is the destination · j scans · min tracks the minimum'
-              : 'i expands the sorted prefix · j tracks the inserted value'}
-        </p>
+        <p className="pointer-help">{algorithm.pointerHelp}</p>
+        {algorithm.id === 'merge' && (
+          <div className="merge-buffer">
+            <p className="eyebrow">TEMPORARY MERGE BUFFER</p>
+            <output data-testid="merge-buffer">
+              [{snapshot.buffer.map((item) => item.value).join(', ')}]
+            </output>
+            <p className="pointer-help">
+              Values collect here before the complete run is written back.
+            </p>
+          </div>
+        )}
       </div>
       <div className="code-note">
         <Lightbulb size={16} />
@@ -132,6 +137,7 @@ export function EducationalPanel({ algorithm }: { algorithm: AlgorithmInfo }) {
               <dd>{algorithm.space}</dd>
             </div>
           </dl>
+          {algorithm.complexityNote && <p>{algorithm.complexityNote}</p>}
           <p>
             Algorithm space excludes the visualizer’s stored snapshots. Playback speed is a learning
             control, not a benchmark.

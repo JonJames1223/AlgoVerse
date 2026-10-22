@@ -4,7 +4,7 @@
 
 AlgoVerse is a browser-only algorithm learning workspace built with React and TypeScript. It combines animated sorting, reversible playback, real operation counts, and explanations tied to the exact algorithm state.
 
-**Status: Phase 1 — Foundation.** Bubble Sort, Selection Sort, and Insertion Sort are implemented. The later-phase navigation opens honest roadmap pages; it does not simulate unfinished features. There is no backend, account system, or deployed URL.
+**Status: Phase 1 complete; Phase 2 sorting algorithms added.** Bubble, Selection, Insertion, Merge, Quick, and Heap Sort are implemented. This update adds only the three sorting algorithms and their existing-lab integration. Battle mode remains deferred. Later-phase navigation opens roadmap pages. There is no backend, account system, or deployed URL.
 
 ## Screenshots
 
@@ -16,16 +16,19 @@ These are actual screenshots from the running application, captured by the brows
 
 [Mobile dashboard](docs/screenshots/dashboard-mobile.png) · [Mobile sorting lab](docs/screenshots/lab-mobile.png)
 
-## What works in Phase 1
+[Merge Sort with buffer — desktop](docs/screenshots/merge-desktop.png) · [Merge Sort — mobile](docs/screenshots/merge-mobile.png)
+
+## What works
 
 - Responsive dark workspace, dashboard, algorithm search (`Ctrl/Cmd + K`), and working routes.
-- Three sorting labs: optimized Bubble Sort, Selection Sort, and adjacent-swap Insertion Sort.
+- Six sorting labs: optimized Bubble Sort, Selection Sort, adjacent-swap Insertion Sort, buffered Merge Sort, last-pivot Quick Sort, and iterative Heap Sort.
 - Play, pause, resume, replay, single-step forward/backward, reset, and timeline seeking.
 - Speed control from 0.5× to 4×; generated arrays from 1–40 elements.
 - Random, reversed, nearly sorted, and duplicate-heavy inputs.
 - Custom arrays, including negative values, duplicates, zero, and decimals, with validation.
 - Animated SVG bars with stable item identities, a zero baseline, state colors, and a text readout.
-- Exact comparison/swap counts, highlighted pseudocode, and current pointer indices.
+- Exact comparison/swap counts (main-array writes for Merge Sort), highlighted pseudocode, and current pointer indices.
+- Merge Sort's temporary buffer is shown alongside the pseudocode and restored during backward playback.
 - Beginner/advanced operation explanations, algorithm intuition, applications, and complexity notes.
 - Persisted playback preferences and recently opened labs. No fabricated learning statistics.
 - Reduced-motion support, keyboard-accessible controls, labeled inputs, visible focus, and recoverable invalid routes.
@@ -50,19 +53,19 @@ Open the Local URL Vite prints, normally **http://127.0.0.1:5173**. `npm ci` is 
 
 ### Commands
 
-| Command                | Purpose                                                     |
-| ---------------------- | ----------------------------------------------------------- |
-| `npm run dev`          | Start the local Vite development server                     |
-| `npm run typecheck`    | Check strict TypeScript types                               |
-| `npm run lint`         | Run ESLint with zero warnings allowed                       |
-| `npm run format`       | Format source and documentation with Prettier               |
-| `npm run format:check` | Verify consistent formatting without changing files         |
-| `npm test`             | Run the 69 unit/integration tests once                      |
-| `npm run test:watch`   | Watch unit/integration tests during development             |
-| `npm run build`        | Type-check and generate the production `dist/` directory    |
-| `npm run preview`      | Serve the production build locally                          |
-| `npm run check`        | Run type-check, lint, unit tests, and production build      |
-| `npm run test:e2e`     | Run 8 browser scenarios across desktop and mobile viewports |
+| Command                | Purpose                                                      |
+| ---------------------- | ------------------------------------------------------------ |
+| `npm run dev`          | Start the local Vite development server                      |
+| `npm run typecheck`    | Check strict TypeScript types                                |
+| `npm run lint`         | Run ESLint with zero warnings allowed                        |
+| `npm run format`       | Format source and documentation with Prettier                |
+| `npm run format:check` | Verify consistent formatting without changing files          |
+| `npm test`             | Run the 121 unit/integration tests once                      |
+| `npm run test:watch`   | Watch unit/integration tests during development              |
+| `npm run build`        | Type-check and generate the production `dist/` directory     |
+| `npm run preview`      | Serve the production build locally                           |
+| `npm run check`        | Run type-check, lint, unit tests, and production build       |
+| `npm run test:e2e`     | Run 14 browser scenarios across desktop and mobile viewports |
 
 ### Browser tests
 
@@ -121,31 +124,40 @@ flowchart LR
 
 Every snapshot stores array items, operation type, active/sorted indices, pointer positions, cumulative counts, explanation text, and a pseudocode line. A bar keeps its original ID even when another bar has the same value.
 
-Stepping backward changes the current index. It does not reverse a swap or rerun the algorithm, so all visible state is restored together. Seeking, manual stepping, resetting, changing the input, or switching algorithms pauses playback. Switching algorithms starts a fresh lab; identical-input comparisons belong to Phase 2.
+Stepping backward changes the current index. It does not reverse a swap or rerun the algorithm, so all visible state is restored together, including Merge Sort's buffer and write count. Seeking, manual stepping, resetting, changing the input, or switching algorithms pauses playback. Switching algorithms starts a fresh lab; identical-input battle comparisons remain deferred.
 
 The algorithms contain **no timers, random generation, React imports, or DOM access**. `usePlayback` owns one cancellable timer. SVG animation only interpolates between snapshots and cannot change algorithm correctness.
 
-## Understanding the three algorithms
+## Understanding the algorithms
 
-| Algorithm      | Core idea                                                                | Best  | Average / worst | Auxiliary space | Stable? |
-| -------------- | ------------------------------------------------------------------------ | ----- | --------------- | --------------- | ------- |
-| Bubble Sort    | Swap adjacent inversions; finalize the largest remaining value each pass | O(n)  | O(n²)           | O(1)            | Yes     |
-| Selection Sort | Find the minimum of the unsorted region; swap it into position           | O(n²) | O(n²)           | O(1)            | No      |
-| Insertion Sort | Move each new value left into the sorted prefix using adjacent swaps     | O(n)  | O(n²)           | O(1)            | Yes     |
+| Algorithm      | Core idea                                                                | Best                   | Average / worst                  | Auxiliary space      | Stable? |
+| -------------- | ------------------------------------------------------------------------ | ---------------------- | -------------------------------- | -------------------- | ------- |
+| Bubble Sort    | Swap adjacent inversions; finalize the largest remaining value each pass | O(n)                   | O(n²)                            | O(1)                 | Yes     |
+| Selection Sort | Find the minimum of the unsorted region; swap it into position           | O(n²)                  | O(n²)                            | O(1)                 | No      |
+| Insertion Sort | Move each new value left into the sorted prefix using adjacent swaps     | O(n)                   | O(n²)                            | O(1)                 | Yes     |
+| Merge Sort     | Recursively sort halves and merge through a temporary buffer             | O(n log n)             | O(n log n)                       | O(n)                 | Yes     |
+| Quick Sort     | Partition around the last item, then recursively sort both sides         | O(n log n)             | O(n log n) average / O(n²) worst | O(n) worst recursion | No      |
+| Heap Sort      | Build a max heap, then repeatedly extract its root                       | O(n) with equal values | O(n log n)                       | O(1)                 | No      |
 
 “Comparisons” counts value comparisons, not loop-bound checks. “Swaps” counts pairwise exchanges; even adjacent-swap Insertion Sort uses this definition. No wall-clock benchmark is presented. Increasing playback speed changes the learning experience, not algorithm performance.
 
-Insertion Sort's green prefix is **sorted relative to itself**, not finalized: later insertions can shift it. The explanation states this explicitly. Bubble Sort's sorted suffix and Selection Sort's sorted prefix are finalized.
+Merge Sort takes the left item on equal comparisons, preserving stability. Its buffer grows as values are selected, then an `overwrite` snapshot commits the complete merged run. The **array writes** counter increases by the run length; it excludes temporary-buffer writes and is not labeled as swaps. Grouped write-back keeps every main-array snapshot a permutation with unique item IDs, which also keeps backward playback and bar animation reliable.
 
-The O(1) space figures describe the underlying algorithms. Recording full immutable snapshots costs **O(n × number of steps)** additional memory, or O(n³) in the worst case for these quadratic algorithms. Inputs are capped at 40 values to keep this educational design responsive. A compact operation log with periodic checkpoints is a potential future optimization, not an implemented feature.
+Quick Sort deliberately uses a deterministic last-element pivot. Its average bound assumes randomly ordered input; sorted, reversed, and all-equal inputs exhibit quadratic comparisons. Recursive stack space is O(log n) for balanced partitions and O(n) in the worst case. Heap Sort uses iterative sift-down. Its linear best case applies to equal values; for distinct keys its best case is O(n log n), as discussed in [Princeton's priority queue notes](https://algs4.cs.princeton.edu/24pq/).
+
+Insertion Sort's green prefix and Merge Sort's green run are **sorted relative to themselves**, not finalized: later operations may move their items. Bubble Sort's sorted suffix, Selection Sort's sorted prefix, Quick Sort's marked pivots, and Heap Sort's sorted suffix are finalized.
+
+The space figures describe the underlying algorithms, excluding trace instrumentation. Recording full immutable snapshots costs **O(n × number of steps)** additional memory, or O(n³) for quadratic traces and O(n² log n) for the Merge/Heap traces. Inputs are capped at 40 values to keep this educational design responsive. A compact operation log with periodic checkpoints is a potential future optimization, not an implemented feature.
 
 See [the Phase 1 walkthrough](docs/PHASE-1-WALKTHROUGH.md) for a guided reading order and a concrete example.
 
+The new implementations are in `src/algorithms/sorting/mergeSort.ts`, `quickSort.ts`, and `heapSort.ts`. Their educational metadata is in `src/data/algorithms.ts`. `trace.ts` adds the frozen buffer and main-array write count; the existing playback reducer and scheduler are unchanged. The selectors, dashboard cards, search, and saved recent-lab validation now accept all six IDs.
+
 ## Validation
 
-The unit suite covers empty/singleton arrays, sorted/reversed input, duplicates, negative values, decimals, invalid numbers, immutable snapshots, exact operation transitions, stability, and algorithm-specific counts. It also checks 480 seeded generated inputs across the three algorithms.
+The unit suite covers empty/singleton arrays, sorted/reversed input, duplicates, negative values, decimals, invalid numbers, immutable snapshots, exact operation transitions, stability, and algorithm-specific counts. It also checks 960 seeded generated inputs across all six algorithms. New guarantees cover stable merge choices and write counts, finalized Quick Sort partitions, max-heap invariants before extraction, and backward restoration after writes/swaps.
 
-Playback tests verify exact backward restoration, clamped seeking, pause/resume, replay, timer cancellation, speed changes, reset, and unmount cleanup. Browser scenarios exercise actual controls, custom inputs, navigation, persisted preferences, corrupt storage recovery, responsive width, and all three sorting labs.
+Playback tests verify exact backward restoration, clamped seeking, pause/resume, replay, timer cancellation, speed changes, reset, and unmount cleanup. Browser scenarios exercise actual controls, custom inputs, navigation, persisted preferences, corrupt storage recovery, responsive width, and all six sorting labs.
 
 The configuration preserves paths in sandboxed Windows checkouts to avoid native `realpath` restrictions. Vitest workers disable Node's experimental Web Storage so jsdom owns browser storage consistently on Node 25. Neither setting changes application behavior in a browser.
 
@@ -155,9 +167,9 @@ Only `algoverse:preferences` and `algoverse:recent` are written to localStorage.
 
 ## Later phases — not implemented
 
-1. **Phase 2:** Merge, Quick, and Heap Sort; sorting battle mode.
+1. **Deferred Phase 2 feature:** sorting battle mode.
 2. **Phase 3:** Pathfinding grids; Dijkstra, A\*, BFS, and DFS; terrain and mazes.
 3. **Phase 4:** Practice challenges, TypeScript/Python code mode, lesson completion and accuracy tracking.
 4. **Phase 5:** Data structure labs, further accessibility/performance refinement, and deployment preparation.
 
-The source includes a Vercel SPA fallback configuration for a future deployment. Use the Vite preset, `npm run build`, and `dist` as the output directory when that phase is authorized. No hosting has been created or published in Phase 1.
+The source includes a Vercel SPA fallback configuration for a future deployment. Use the Vite preset, `npm run build`, and `dist` as the output directory when that phase is authorized. No hosting has been created or published.

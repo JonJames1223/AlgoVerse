@@ -1105,6 +1105,7 @@ h1 {
 }
 .algorithm-tabs {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 3px;
   border-bottom: 1px solid #303444;
@@ -1119,6 +1120,7 @@ h1 {
   font-size: 11px;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  white-space: nowrap;
 }
 .algorithm-tabs > a:first-child {
   padding-left: 4px;
@@ -1702,6 +1704,19 @@ select {
   line-height: 1.8;
   color: #858da5;
   margin-top: 13px;
+}
+.merge-buffer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.merge-buffer output {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
 }
 .code-note {
   display: flex;
@@ -2538,7 +2553,7 @@ select {
     padding: 12px 10px;
     font-size: 9px;
     gap: 6px;
-    flex: 1;
+    flex: 0 0 33.333%;
     justify-content: center;
   }
   .tab-selected {

@@ -1,5 +1,12 @@
-export type AlgorithmId = 'bubble' | 'selection' | 'insertion';
-export type Operation = 'ready' | 'compare' | 'swap' | 'select' | 'sorted' | 'complete';
+export type AlgorithmId = 'bubble' | 'selection' | 'insertion' | 'merge' | 'quick' | 'heap';
+export type Operation =
+  | 'ready'
+  | 'compare'
+  | 'swap'
+  | 'overwrite'
+  | 'select'
+  | 'sorted'
+  | 'complete';
 
 export interface ArrayItem {
   readonly id: number;
@@ -15,6 +22,9 @@ export interface SortSnapshot {
   readonly pointers: Readonly<Record<string, number>>;
   readonly comparisons: number;
   readonly swaps: number;
+  /** Main-array writes from buffered merges; separate from pairwise swaps. */
+  readonly writes: number;
+  readonly buffer: readonly ArrayItem[];
   readonly line: number;
   readonly explanation: string;
   readonly advanced: string;
@@ -33,7 +43,10 @@ export interface AlgorithmInfo {
   average: string;
   worst: string;
   space: string;
+  complexityNote?: string;
   stable: boolean;
+  level: 'Beginner' | 'Intermediate';
+  pointerHelp: string;
   pseudocode: readonly string[];
   accent: 'violet' | 'cyan' | 'amber';
 }

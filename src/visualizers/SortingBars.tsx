@@ -1,7 +1,15 @@
 import { motion, useReducedMotion } from 'motion/react';
 import type { SortSnapshot } from '../types/algorithm';
 
-export function SortingBars({ snapshot, speed }: { snapshot: SortSnapshot; speed: number }) {
+export function SortingBars({
+  snapshot,
+  speed,
+  buffered = false,
+}: {
+  snapshot: SortSnapshot;
+  speed: number;
+  buffered?: boolean;
+}) {
   const reduced = useReducedMotion();
   const values = snapshot.items.map((item) => item.value);
   const low = Math.min(0, ...values);
@@ -41,7 +49,7 @@ export function SortingBars({ snapshot, speed }: { snapshot: SortSnapshot; speed
           const active = snapshot.active.includes(index);
           const sorted = snapshot.sorted.includes(index);
           const state = active
-            ? snapshot.operation === 'swap'
+            ? snapshot.operation === 'swap' || snapshot.operation === 'overwrite'
               ? 'swap'
               : 'compare'
             : sorted
@@ -101,7 +109,7 @@ export function SortingBars({ snapshot, speed }: { snapshot: SortSnapshot; speed
         </span>
         <span>
           <i className="legend-swap" />
-          Swapping
+          {buffered ? 'Writing merged run' : 'Swapping'}
         </span>
         <span>
           <i className="legend-sorted" />

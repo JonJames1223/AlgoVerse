@@ -66,7 +66,7 @@ export function Roadmap() {
       <h1>{item.name}</h1>
       <p className="roadmap-description">{item.description}</p>
       <p className="muted">
-        This feature is on the roadmap. The Phase 1 sorting labs are ready to explore.
+        This feature is on the roadmap. The six sorting labs are ready to explore.
       </p>
       <Link to="/sorting/bubble" className="button primary mt-7">
         Explore the sorting lab <ArrowRight size={16} />
@@ -76,7 +76,7 @@ export function Roadmap() {
         <h2>A strong foundation.</h2>
         <div>
           <span>
-            <Check size={16} /> Three sorting algorithms
+            <Check size={16} /> Six sorting algorithms
           </span>
           <span>
             <Check size={16} /> Reversible playback

@@ -23,8 +23,9 @@ for (const id of algorithmIds) {
         const frames = sortAlgorithms[id](Object.freeze([...input]));
         expect(input).toEqual(original);
         expect(frames[0].items.map((item) => item.value)).toEqual(input);
-        expect(frames.at(-1)?.items.map((item) => item.value)).toEqual(
-          [...input].sort((a, b) => a - b),
+        // Unstable sorts may reorder numerically equivalent +0 and -0.
+        expect(frames.at(-1)?.items.map((item) => item.value || 0)).toEqual(
+          [...input].sort((a, b) => a - b).map((value) => value || 0),
         );
         expect(frames.at(-1)?.operation).toBe('complete');
         expect(frames.at(-1)?.sorted).toHaveLength(input.length);
@@ -36,11 +37,14 @@ for (const id of algorithmIds) {
       const frames = sortAlgorithms[id](input);
       let comparisons = 0;
       let swaps = 0;
+      let writes = 0;
       frames.forEach((frame, index) => {
         if (frame.operation === 'compare') comparisons++;
         if (frame.operation === 'swap') swaps++;
+        if (frame.operation === 'overwrite') writes += frame.active.length;
         expect(frame.comparisons).toBe(comparisons);
         expect(frame.swaps).toBe(swaps);
+        expect(frame.writes).toBe(writes);
         expect(frame.line).toBeGreaterThanOrEqual(-1);
         expect(frame.line).toBeLessThan(algorithms[id].pseudocode.length);
         expect(frame.explanation.length).toBeGreaterThan(10);
@@ -48,6 +52,8 @@ for (const id of algorithmIds) {
         expect(Object.isFrozen(frame.items)).toBe(true);
         expect(Object.isFrozen(frame.active)).toBe(true);
         expect(Object.isFrozen(frame.pointers)).toBe(true);
+        expect(Object.isFrozen(frame.buffer)).toBe(true);
+        frame.buffer.forEach((item) => expect(Object.isFrozen(item)).toBe(true));
         expect(frame.items.map((item) => item.id).sort((a, b) => a - b)).toEqual(
           input.map((_, i) => i),
         );
@@ -70,6 +76,12 @@ for (const id of algorithmIds) {
             expect(changed).toHaveLength(2);
             expect([...frame.active].sort((a, b) => a - b)).toEqual(changed);
             expect(frame.items[changed[0]].id).toBe(before[changed[1]].id);
+          } else if (frame.operation === 'overwrite') {
+            expect(id).toBe('merge');
+            const { lo, hi } = frame.pointers;
+            expect(frame.items.slice(lo, hi + 1)).toEqual(frame.buffer);
+            expect(frame.items.slice(0, lo)).toEqual(before.slice(0, lo));
+            expect(frame.items.slice(hi + 1)).toEqual(before.slice(hi + 1));
           } else expect(frame.items).toEqual(before);
         }
       });
@@ -119,7 +131,7 @@ describe('algorithm guarantees', () => {
     expect(final.swaps).toBe(10);
     expect(final.comparisons).toBe(10);
   });
-  it.each(['bubble', 'insertion'] as const)(
+  it.each(['bubble', 'insertion', 'merge'] as const)(
     '%s preserves the identity order of equal values',
     (id) => {
       const final = sortAlgorithms[id]([3, 1, 3, 2, 1, 2, 3]).at(-1)!;

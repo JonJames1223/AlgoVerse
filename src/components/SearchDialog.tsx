@@ -44,11 +44,9 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
         ))}
       </div>
       {!filtered.length && (
-        <p className="muted py-5">
-          No matching algorithms. Try “bubble”, “selection”, or “insertion”.
-        </p>
+        <p className="muted py-5">No matching algorithms. Try “merge”, “quick”, or “heap”.</p>
       )}
-      <p className="text-xs muted mt-4">Three working labs in the foundation release.</p>
+      <p className="text-xs muted mt-4">{algorithmIds.length} working sorting labs.</p>
     </dialog>
   );
 }

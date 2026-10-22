@@ -83,7 +83,6 @@ function SortingWorkspace({ algorithmId }: { algorithmId: AlgorithmId }) {
             {id === algorithmId && <span className="tab-selected">LAB</span>}
           </Link>
         ))}
-        <span className="tabs-hint">Choose a way to find order</span>
       </nav>
       <section className="panel input-panel" aria-label="Dataset controls">
         <div className="input-toolbar">
@@ -225,8 +224,10 @@ function LabPlayer({ algorithmId, input }: { algorithmId: AlgorithmId; input: re
             </strong>
           </div>
           <div>
-            <span>SWAPS</span>
-            <strong data-testid="swaps">{frame.swaps.toString().padStart(2, '0')}</strong>
+            <span>{algorithmId === 'merge' ? 'ARRAY WRITES' : 'SWAPS'}</span>
+            <strong data-testid={algorithmId === 'merge' ? 'writes' : 'swaps'}>
+              {(algorithmId === 'merge' ? frame.writes : frame.swaps).toString().padStart(2, '0')}
+            </strong>
           </div>
           <div className="speed-control">
             <label htmlFor="playback-speed">
@@ -243,7 +244,7 @@ function LabPlayer({ algorithmId, input }: { algorithmId: AlgorithmId; input: re
             />
           </div>
         </div>
-        <SortingBars snapshot={frame} speed={speed} />
+        <SortingBars snapshot={frame} speed={speed} buffered={algorithmId === 'merge'} />
         <PlaybackControls {...playback} />
         <div className={`step-insight ${completed ? 'insight-complete' : ''}`}>
           <span className="insight-icon">

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { SearchDialog } from '../components/SearchDialog';
+import { algorithmIds } from '../data/algorithms';
 import { usePreferences } from '../hooks/PreferencesProvider';
 
 const planned = [
@@ -103,7 +104,7 @@ export function AppLayout() {
           >
             <BarChart3 size={18} />
             <span>Sorting algorithms</span>
-            <span className="nav-count">3</span>
+            <span className="nav-count">{algorithmIds.length}</span>
           </NavLink>
           <div className="nav-caption mt-8">
             ON THE HORIZON <span>PHASE</span>
@@ -138,7 +139,10 @@ export function AppLayout() {
           <div className="profile">
             <span className="profile-avatar">Y</span>
             <span>
-              Your workspace<small>{recent.length} of 3 sorting labs explored</small>
+              Your workspace
+              <small>
+                {recent.length} of {algorithmIds.length} sorting labs explored
+              </small>
             </span>
             <span className="version">v0.1</span>
           </div>
@@ -178,7 +182,7 @@ export function AppLayout() {
         </main>
         <footer className="app-footer">
           <span>
-            <span className="online-dot" /> Foundation release
+            <span className="online-dot" /> Sorting labs
           </span>
           <span>Built for the way you think.</span>
         </footer>
