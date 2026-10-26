@@ -4,7 +4,9 @@
 
 AlgoVerse is a browser-only algorithm learning workspace built with React and TypeScript. It combines animated sorting, reversible playback, real operation counts, and explanations tied to the exact algorithm state.
 
-**Status: Phase 1 complete; Phase 2 sorting algorithms added.** Bubble, Selection, Insertion, Merge, Quick, and Heap Sort are implemented. This update adds only the three sorting algorithms and their existing-lab integration. Battle mode remains deferred. Later-phase navigation opens roadmap pages. There is no backend, account system, or deployed URL.
+**[Deployed on Vercel — open AlgoVerse](https://algo-verse-blush-rho.vercel.app/)**
+
+**Status: Phase 1 complete; sorting algorithms added.** Bubble, Selection, Insertion, Merge, Quick, and Heap Sort are implemented. Battle mode remains deferred. Later-phase navigation opens roadmap pages. There is no backend or account system.
 
 ## Screenshots
 
@@ -170,6 +172,6 @@ Only `algoverse:preferences` and `algoverse:recent` are written to localStorage.
 1. **Deferred Phase 2 feature:** sorting battle mode.
 2. **Phase 3:** Pathfinding grids; Dijkstra, A\*, BFS, and DFS; terrain and mazes.
 3. **Phase 4:** Practice challenges, TypeScript/Python code mode, lesson completion and accuracy tracking.
-4. **Phase 5:** Data structure labs, further accessibility/performance refinement, and deployment preparation.
+4. **Phase 5:** Data structure labs and further accessibility/performance refinement.
 
-The source includes a Vercel SPA fallback configuration for a future deployment. Use the Vite preset, `npm run build`, and `dist` as the output directory when that phase is authorized. No hosting has been created or published.
+The app is deployed on Vercel at [algo-verse-blush-rho.vercel.app](https://algo-verse-blush-rho.vercel.app/). The Vercel configuration provides the SPA fallback for client-side routes.
